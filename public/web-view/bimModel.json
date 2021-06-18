@@ -1,0 +1,114 @@
+{
+  "code": 200,
+  "message": "成功",
+  "data": {
+    "dbc9fdc83a324a2b9d6ef6c0dd56c675_1":[
+      {
+        "id":"dbc9fdc83a324a2b9d6ef6c0dd56c675_1",
+        "name":"K7-1#精装修"
+      },
+      {
+        "id":"fbe72dbbfe9445d2ba7c053d73d676aa_1",
+        "name":"K7-1# 首层水电"
+      },
+      {
+        "id":"2a95e7123b194447a1b443a5ea1bac18_1",
+        "name":"K7-1# 5F水电"
+      }
+    ],
+    "518d289f265646f79e66c84a09e4953f_1":[
+      {
+        "id":"518d289f265646f79e66c84a09e4953f_1",
+        "name":"K7-2#精装修"
+      },
+      {
+        "id":"0992f5b022fa4c4fbbbeadf5edd3826e_1",
+        "name":"K7-2# 首层水电"
+      },
+      {
+        "id":"bc23aa7f3f264df1b15cf21598f4cb56_1",
+        "name":"K7-2# 5F 水电"
+      }
+    ],
+    "ac93ec7a870d4ee3b2ba4b1b08d03e3f_1":[
+      {
+        "id":"ac93ec7a870d4ee3b2ba4b1b08d03e3f_1",
+        "name":"K7-3#精装修"
+      },
+      {
+        "id":"804464b1f47547d9b5ad436be157f536_1",
+        "name":"K7-3# 首层水电"
+      },
+      {
+        "id":"afa9a3d5211e48c993156393ef416cb5_1",
+        "name":"K7-3# 5F水电"
+      }
+    ],
+    "2bc2a9a84b8f433a96dbc868dae76ec3_1":[
+      {
+        "id":"2bc2a9a84b8f433a96dbc868dae76ec3_1",
+        "name":"K7-4#精装修"
+      },
+      {
+        "id":"29ec354310c341ed95d5a89b6efbd874_1",
+        "name":"K7-4# 首层水电"
+      },
+      {
+        "id":"bed246ba2cf7402d8232c25b2e744c0c_1",
+        "name":"K7-4# 5F水电"
+      }
+    ],
+    "118bad9a24244995913b69c73943ddc3_1":[
+      {
+        "id":"8cb93120b5ce44079e5c7dde5a74fe7e_1",
+        "name":"K7-5#精装修"
+      },
+      {
+        "id":"29cdfa20049e42e1a30595cd6687d2b0_1",
+        "name":"K7-5# 首层水电"
+      },
+      {
+        "id":"772a4baa1b6f44f0b0d66e0eca23443a_1",
+        "name":"K7-5# 5F水电"
+      }
+    ],
+    "3ece17c6932c4c0ead96e1c000aa02c5_1": [
+      {
+        "id": "3ece17c6932c4c0ead96e1c000aa02c5_1",
+        "name": "K7地块总平面"
+      }
+    ],
+    "f899069ef11241218f3f22f80fd4b87a_1": [
+      {
+        "id": "118bad9a24244995913b69c73943ddc3_1",
+        "name": "土建"
+      },
+      {
+        "id": "6d1bcab6286e459bbbd00c7c6a741704_1",
+        "name": "机电"
+      },
+      {
+        "id": "f899069ef11241218f3f22f80fd4b87a_1",
+        "name": "精装"
+      },
+      {
+        "id": "70061bf0abd444e590720f278095440d_1",
+        "name": "精装2"
+      }
+    ],
+    "b7156f3b7dd247c7a2a493e27ceec999_1": [
+      {
+        "id": "ee3f0e0d5cd149a9a2c7bcbbfdd3d26e_1",
+        "name": "北辰-光谷里-主体"
+      },
+      {
+        "id": "b7156f3b7dd247c7a2a493e27ceec999_1",
+        "name": "北辰-光谷里-公寓精装修"
+      },
+      {
+        "id": "80d537f3ae964d68ae739acc593bb2fe_1",
+        "name": "北辰-光谷里-公寓MEP"
+      }
+    ]
+  }  
+}

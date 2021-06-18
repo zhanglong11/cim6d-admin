@@ -1,0 +1,14 @@
+@import '../../styles/variables.scss';
+
+.el-header {
+  height: auto !important;
+  .el-form{
+    display: flex;
+    justify-content: space-between;
+    }
+
+}
+.active-name{
+  cursor: pointer;
+  color:$menuActiveText ;
+}

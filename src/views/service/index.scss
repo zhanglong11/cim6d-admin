@@ -1,0 +1,14 @@
+@import '../../styles/variables.scss';
+
+.el-header {
+  height: auto !important;
+
+}
+
+.el-form-item.sdkFileName{
+  ::v-deep .el-form-item__label::before{
+    content: '*';
+    color: #F56C6C;
+    margin-right: 4px;
+  }
+}

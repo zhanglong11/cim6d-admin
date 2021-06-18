@@ -1,0 +1,28 @@
+@import '@/styles/variables.scss';
+.base-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  line-height: 32px;
+
+  .info-label {
+    color: $tipColor;
+    padding-right: 10px;
+  }
+
+}
+
+.el-header {
+  height: auto !important;
+  .el-form{
+    display: flex;
+    justify-content: space-between;
+    }
+
+}
+
+.el-select,
+.el-date-editor {
+  width: 100%;
+}

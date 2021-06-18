@@ -1,0 +1,118 @@
+@import '@/styles/variables.scss';
+
+// 内容区域按钮
+.view-body {
+  background-color: #ffffff;
+  padding: 20px 0;
+  // height: 100%;
+  flex: 1 20vh;
+
+  >.el-main {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+// 流体按钮
+.fuild-btn {
+  width: 100%;
+  font-size: 14px;
+}
+
+.mb10 {
+  margin-bottom: 10px;
+}
+.ml10{
+  margin-left: 10px;
+}
+.mb5{
+  margin-bottom: 5px;
+}
+.pad10{
+  padding: 10px;
+}
+.pad15{
+  padding: 15px;
+}
+.mt15{
+  margin-top: 15px;
+}
+.pad0_15{
+  padding: 0 15px;
+}
+
+
+// small 样式重置
+.el-button--small {
+  font-size: 12px;
+}
+
+.el-table--small {
+  font-size: 14px;
+
+  .el-button--mini {
+    font-size: 14px;
+    padding: 5px;
+  }
+}
+.el-button{
+  ::v-deep i[class^=el-icon]{
+    vertical-align: top;
+  }
+}
+.el-table {
+  &.header-fff{
+    ::v-deep .el-table__header {
+      ::v-deep th {
+        background-color: #ffffff;
+      }
+    }  }
+  ::v-deep .el-table__header {
+    ::v-deep th {
+      background-color: $defaultBg;
+    }
+  }
+}
+
+.pad-0 {
+  padding: 0 !important;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .status {
+    width: 6px;
+    height: 6px;
+    background-color: $tipColor;
+    border-radius: 50%;
+    margin: 0 7px;
+    background-color: $tipColor;
+    &+.status-text{
+      color:$tipColor;
+    }
+
+
+    &.danger{
+      background-color: $dangerColor;
+      &+.status-text{
+        color:$mainColor;
+      }
+
+    }
+    &.success{
+      background-color: $successColor;
+      &+.status-text{
+        color:$mainColor;
+      }
+    }
+  }
+
+
+
+}
+.el-header{
+  height: auto !important;
+}

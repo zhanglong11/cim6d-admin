@@ -1,0 +1,113 @@
+@import '@/styles/common.scss';
+.box-card .no-padding {
+  ::v-deep > .el-card__body {
+    padding: 0 15px;
+  }
+}
+.tags {
+  span {
+    margin-right: 10px;
+    margin-top: 10px;
+  }
+}
+.no-config {
+  color: #909399;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  ::v-deep.el-button {
+    font-size: 14px;
+  }
+}
+.custom-transfer {
+  i {
+    font-style: normal;
+    color: red;
+    font-size: 0;
+    display: inline-block;
+    vertical-align: middle;
+    width: 5px;
+    &.active {
+      font-size: 16px;
+    }
+  }
+}
+.template-details {
+  display: flex;
+  position: relative;
+  min-height: 200px;
+  &:before {
+    content: '';
+    position: absolute;
+    width: 1px;
+    height: 100%;
+    top: 0;
+    left: 50%;
+    background: #eee;
+  }
+  .details-left,
+  .details-right {
+    flex: 1;
+    padding: 0 15px;
+  }
+  .details-left {
+    .details-content {
+      display: flex;
+      .desc {
+        flex: 1;
+        border: 1px #eee solid;
+        padding: 10px;
+        font-size: 12px;
+        line-height: 1.8;
+        p{
+          margin: 0;
+          padding: 0;
+          &.active{
+            ::v-deep.link{
+              color: #67c23a;
+            }
+          }
+        }
+        ::v-deep.link{
+          color: #409EFF;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+  .details-right {
+    .details-example {
+      border: 1px #eee solid;
+      .desc {
+        padding: 10px;
+        min-height: 120px;
+        font-size: 12px;
+        line-height: 1.8;
+      }
+      .details-view {
+        border-top: 1px #eee solid;
+        color: #999;
+        display: flex;
+        align-items: center;
+        margin: 0;
+        padding: 0 15px;
+        height: 40px;
+        span {
+          flex: 1;
+        }
+        &:after {
+          content: '';
+          border: 2px #ccc solid;
+          border-left: 0;
+          border-bottom: 0;
+          transform: rotate(45deg);
+          width: 8px;
+          height: 8px;
+        }
+      }
+    }
+  }
+}

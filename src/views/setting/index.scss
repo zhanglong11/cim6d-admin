@@ -1,0 +1,68 @@
+@import '../../styles/variables.scss';
+.view-body{
+  height: 100%;
+  overflow: hidden;
+}
+.el-aside{
+  padding: 0 15px;
+  border-right: solid 1px $borderColor;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  .el-card{
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+.el-table{
+  height: 80%;
+  overflow-y: auto;
+  &:before{
+    display: none;
+  }
+}
+.group-item{
+  line-height: 22px;
+  padding: 8px 10px;
+  min-height: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items:center;
+  font-size: 14px;
+  cursor: pointer;
+  .arg-text{
+    flex: 1;
+  }
+  .el-icon{
+    margin-left: 15px;
+    font-size: 18px;
+    color: $tipColor;
+  }
+  &.active-item{
+    background-color: #e6f7ff;
+  }
+  &.emptyTip{
+    justify-content: center;
+    margin: 15px 0;
+    color: $tipColor;
+  }
+  
+}
+
+.base-info{
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  line-height: 32px;
+  .info-label{
+    color:$tipColor;
+    padding-right: 10px;
+  }
+}
+.action-wrapper{
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+}

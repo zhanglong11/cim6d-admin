@@ -1,0 +1,12 @@
+@import '@/styles/variables.scss';
+.el-header {
+  height: auto !important;
+  .el-form{
+    display: flex;
+    justify-content: space-between;
+    }
+
+}
+.el-select{
+  width: 100%;
+}

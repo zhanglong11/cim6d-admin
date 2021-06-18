@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+  <title>进度统计</title>
+  <link href="https://cdn.bootcdn.net/ajax/libs/minireset.css/0.0.2/minireset.min.css" rel="stylesheet">
+  <link href="./js/dhtmlxgantt_material.css" rel="stylesheet">
+  <script src="https://cdn.bootcdn.net/ajax/libs/qs/6.9.4/qs.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/dayjs/1.8.28/dayjs.min.js"></script>
+  <script src="./js/dhtmlxgantt.js"></script>
+  <script src="./js/dhtmlxgantt-locale.js"></script>
+</head>
+<body>
+<div style="width:100%;height:100%">
+  <div id="app">
+    <div ref="gantt" style="height: 1600px;"></div>
+  </div>
+</div>
+
+<script>
+const app = new Vue({
+  el:'#app',
+  data(){
+    return {
+      tasks:[
+        {id: 1, text: '哈哈', start_date: '2019-01-17 00:00:00', duration: 3, progress: 0.6},
+        {id: 2, text: 'Task #2', start_date: '2018-01-20 00:00:00', duration: 3, progress: 0.4}
+      ],
+      viewMode: 3
+    }
+  },
+  async created(){
+    await this.refresh()
+    this.setupGanttChart()
+  },
+  methods:{
+    async refresh(){
+      const list = await fetch(location.origin+'/cim6d-schedule'+new URLSearchParams(location.search).get('urlSuffix')+'/construct/plan/taskList/'+new URLSearchParams(location.search).get('projectId'),
+      {
+        headers:{
+          'x-access-token':new URLSearchParams(location.search).get('token')
+        }
+      }
+      ).then(res=>res.json()).then(res=>(res && res.data) ? res.data.taskList : [])
+
+      list.forEach(e=>{
+        // e.id = ''+e.taskUniqueId
+        e.text = e.name
+        e.start_date = e.planStartTime
+        e.end_date = e.planEndTime
+        e.duration = e.planDuration
+        e.progress = e.actualProgress
+        // e.parent =''+ e.parentTaskUniqueId
+      })
+      this.tasks = list
+    },
+    setupGanttChart() {
+      gantt.config.scale_height = 50
+      gantt.config.task_height = 16
+      gantt.config.row_height = 40
+      gantt.config.min_column_width = 40
+      gantt.config.show_task_cells = false
+      gantt.config.readonly = true
+      gantt.config.date_format = "%Y-%m-%d %H:%i:%s";
+      gantt.config.columns = [{name: "text",
+        resize: true,
+        // tree: true,
+        width: 182}]
+      gantt.init(this.$refs.gantt)
+      this.setScale()
+      gantt.parse({
+        data: this.tasks,
+        links: []
+      })
+      gantt.attachEvent('onTaskDblClick', id => {
+        return false
+      })
+      gantt.attachEvent('onTaskClick', id => {
+        this.$emit('taskClick', id)
+      })
+    },
+    setScale() {
+      gantt.config.scales = [
+        [{ unit: 'month', step: 1, format: '%Y年%M' }],
+        [{ unit: 'week', step: 1, format: '%Y年%M%d日', width: 200 }],
+        [
+          { unit: 'week', step: 1, format: '%F, %Y' },
+          { unit: 'day', step: 1, format: '%j, %D' }
+        ]
+      ][this.viewMode - 1]
+      gantt.config.min_column_width = [60, 100, 40][this.viewMode - 1]
+      gantt.render()
+    }
+  }
+})
+
+</script>
+</body>
+</html>

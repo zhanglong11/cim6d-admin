@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>查看模型</title>  
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">   
+    <script src="../js/libs/jquery.min.js"></script>
+    <script type="text/javascript" src="https://js.cdn.aliyun.dcloud.net.cn/dev/uni-app/uni.webview.1.5.2.js"></script>
+		
+    <!-- Bim初始化 -->
+    <link rel="stylesheet" href="../../V1.6.2/lib/style.css" type="text/css">
+		<script src="../../V1.6.2/thirdpart/snap/snap.svg-min.js"></script>
+		<script src="../../V1.6.2/thirdpart/html2canvas/html2canvas.min.js"></script>
+		<script src="../../V1.6.2/lib/viewer3D.js"></script>
+		<script src="../../V1.6.2/lib/Matcal.js" type="text/javascript"></script>
+		<script src="../../V1.6.2/Bimfish.min.js"></script>       
+    <!-- <link rel="stylesheet" href="http://luoyang.gim6d.com:28081/bimFront/V1.6.2/lib/style.css" type="text/css">
+    <script src="http://luoyang.gim6d.com:28081/bimFront/V1.6.2/thirdpart/jquery/jquery.min.js"></script>
+    <script src="http://luoyang.gim6d.com:28081/bimFront/V1.6.2/thirdpart/snap/snap.svg-min.js"></script>
+    <script src="http://luoyang.gim6d.com:28081/bimFront/V1.6.2/thirdpart/html2canvas/html2canvas.min.js"></script>
+    <script src="http://luoyang.gim6d.com:28081/bimFront/V1.6.2/lib/viewer3D.js"></script>
+    <script src="http://luoyang.gim6d.com:28081/bimFront/V1.6.2/lib/Matcal.js" type="text/javascript"></script>
+    <script src="http://luoyang.gim6d.com:28081/bimFront/V1.6.2/Bimfish.min.js"></script> 
+    <script type="text/javascript" src="https://js.cdn.aliyun.dcloud.net.cn/dev/uni-app/uni.webview.1.5.2.js"></script> -->
+    <script>      
+      // 获取地址栏参数
+      function getUrlStr(key) {
+          var url = window.location.search;
+          var reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)");
+          var result = url.substr(1).match(reg);
+          return result ? decodeURIComponent(result[2]) : null;
+      }
+      var AppBimfish = null;
+      var configId = getUrlStr('configId')
+      var showBtn = getUrlStr('showBtn')
+      let env = getUrlStr('env')
+      let dataProcess = `/cim6d-bim-light${env}`
+      var url = getUrlStr('url')
+      var entityId = getUrlStr('id') || ''
+      var modelUrl = url
+      var token = getUrlStr('token')
+      var labelName = '关联名称'
+      var currentGuid = ''
+      var entityName = getUrlStr('entityName') || '模型展示'
+      var floorList = [] // 楼层数据
+      var floorProblemsList = {} // 楼层问题数据
+      var floorNum = getUrlStr('floorNum') || '' // 传入楼层数      
+      let selectEntity = getUrlStr('selectEntity')
+      let projectId = getUrlStr('projectId') || '' // 项目id
+      let guidArray = getUrlStr('guidArray') ? getUrlStr('guidArray').split(',') : [] // 需要查询的构建数组
+      let fitViewByGUID = getUrlStr('projectId') === 'true' // 定位到构件
+      
+      var modelUrlList = {} // 临时拼接模型
+      document.title = entityName
+      // 动态改变图形
+      function getPropertyByGUID(currentGuid, isMaterials){
+        AppBimfish.getPropertyByGUID(currentGuid, (err, e) => {
+            e.map(item => {
+              if(item.displayName === labelName){
+                if(!isMaterials){                  
+                  AppBimfish.search(item.displayValue, labelName, (array) => {
+                    AppBimfish.isolate(array)
+                  },true)
+                }else{
+                  var title = item.displayValue
+                  var floorNum = item.displayValue.split('-')[1].replace('F', '')
+                  uni.navigateTo({  
+                    url: `/pages/task/materials?title=${title}&floor=${floorNum}` 
+                  }); 
+                }
+              }
+            })
+          })
+      }
+      // 获取属性
+      function getAttribute(isMaterials = false){
+        AppBimfish.getComponentGuid(function (err, guid) {
+          if(guid){
+            currentGuid = guid
+          }        
+          if(!currentGuid){
+            return
+          }  
+          getPropertyByGUID(currentGuid, isMaterials)
+        })
+      }
+    </script>
+    <style>
+      html,body{
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+      }
+      .bim-viewer{
+        flex: 1;
+      }
+      .bim-btn-group{
+        margin-top: 15px;
+        position: fixed;
+        z-index: 2;
+        left: 0;
+      }
+      .bim-btn-group-right{
+        left: initial;
+        right: 0;
+        margin-top: 57px;
+      }
+      .bim-btn-group-right .bim-btn{
+        border-radius: 45px 0 0 45px;
+      }
+      .bim-btn{
+        margin-bottom: 10px;
+        background: #4778F3;
+        color: #fff;
+        line-height: 2.3;
+        font-size: 13px;
+        padding: 0 1.34em;
+        border-radius: 0 45px 45px 0;
+        border: 0;
+        outline: none;
+        display: none;
+      }
+      .bim-viewer .gmmk{
+        background: rgba(0, 0, 0, 0.5);
+        padding: 0 5px 4px;
+        border-radius: 4px;
+        box-shadow: 0, 0, 5px, rgba(255, 255, 255, 0.3); 
+        display: flex;
+        align-items: center;
+        justify-content: center;  
+      }
+      .bim-viewer .gmmk text{
+        font-size: 9px !important;
+      }
+    </style>
+  </head>
+
+  <body>1212
+    <div class="bim-btn-group">
+      <button class="bim-btn" id="bimBtn" size="mini">查看材料清单</button>
+      <button class="bim-btn" id="bimModelBtn" size="mini">单层模型</button>
+      <button class="bim-btn" id="bimModelAllBtn" size="mini">整栋模型</button>
+    </div>
+    <div class="bim-btn-group bim-btn-group-right">
+      <button class="bim-btn" id="bimHideProblems" size="mini">隐藏问题</button>
+      <button class="bim-btn" id="bimShowProblems" size="mini">显示问题</button>
+    </div>
+    <div id="bimViewer" class="bim-viewer"></div>
+    <script>
+      document.addEventListener('UniAppJSBridgeReady', function() {  
+        // 查看材料清单
+        document.querySelector('#bimBtn').addEventListener('click', function(evt) {  
+          var target = evt.target;  
+          if (target.tagName === 'BUTTON') {  
+            getAttribute(true)
+          }  
+        }); 
+        // 单层模型
+        document.querySelector('#bimModelBtn').addEventListener('click', function(evt) {  
+          var target = evt.target;  
+          if (target.tagName === 'BUTTON') {  
+            getAttribute()
+          }  
+        });  
+        // 整栋模型
+        document.querySelector('#bimModelAllBtn').addEventListener('click', function(evt) {  
+          var target = evt.target;  
+          if (target.tagName === 'BUTTON') {  
+            currentGuid = ''
+            AppBimfish.showAll()
+            AppBimfish.clearThemingColors()
+            AppBimfish.clearTextDrawableMarker()
+            getFloorList()
+          }  
+        });  
+        
+        // 隐藏问题
+        document.querySelector('#bimHideProblems').addEventListener('click', function(evt) {  
+          var target = evt.target;  
+          if (target.tagName === 'BUTTON') {  
+            AppBimfish.clearTextDrawableMarker()
+          }  
+        });
+        
+        // 显示问题
+        document.querySelector('#bimShowProblems').addEventListener('click', function(evt) {  
+          var target = evt.target;  
+          if (target.tagName === 'BUTTON') {  
+            AppBimfish.clearTextDrawableMarker()
+            getFloorProblems()
+          }  
+        });   
+      });
+      if(showBtn === 'true'){
+        // document.getElementById('bimBtn').style.display = 'block'
+        // document.getElementById('bimModelBtn').style.display = 'block'  
+        // document.getElementById('bimModelAllBtn').style.display = 'block' 
+        // document.getElementById('bimHideProblems').style.display = 'block' 
+        // document.getElementById('bimShowProblems').style.display = 'block'
+      }
+      // 高亮颜色
+      function selectAttribute(array, callback){
+        if(array.length === 0){
+          return;
+        }
+        let entityIdList = entityId.split('_')
+        $.ajax({  
+          headers: {  
+            'Content-Type': 'application/json',
+            'x-access-token': token
+          },  
+          type: "post",
+          data: JSON.stringify({
+            "modelId": entityIdList[0],
+            "modelVersion": entityIdList[1],
+            "attributeName": "关联名称",
+            "attributeValueList": array
+          }),
+          dataType: "json",
+          url: `${location.origin}/cim6d-data-processing/bim/component/selectAttribute`,
+          success: function (res) {
+            if(res.data.length > 0){
+              callback(res.data)
+              AppBimfish.viewer.impl.invalidate(false,false,true)
+            }            
+          }
+        })        
+      }
+
+      // 多条件查询guid
+      function searchMultiAttribute(obj) {
+        // 查询缓存中是否有数据
+        if(floorProblemsList[obj.floorNum]){
+          AppBimfish.addDrawableTextMarkerByGUID([floorProblemsList[obj.floorNum][obj.index]], `${obj.floorNum}层 ${obj.name}（${obj.number}）`, obj.color, obj.callback) 
+          return
+        }
+        let entityIdList = entityId.split('_')
+        $.ajax({  
+          headers: {  
+            'Content-Type': 'application/json',
+            'x-access-token': token
+          },  
+          type: "post",
+          data: JSON.stringify({
+            "modelId": entityIdList[0],
+            "modelVersion": entityIdList[1],
+            //"rows": 3,
+            "attributeList": [
+              {
+                'attributeName': "关联名称",
+                'attributeValueList': obj.list
+              }
+            ]
+          }),
+          dataType: "json",
+          url: `${location.origin}/cim6d-data-processing/bim/component/selectMultiAttribute`,
+          success: function (res) {
+            if(!res.data || res.data.length == 0){
+              return
+            }
+            floorProblemsList[obj.floorNum] = res.data
+            AppBimfish.addDrawableTextMarkerByGUID([res.data[obj.index]], `${obj.floorNum}层 ${obj.name}（${obj.number}）`, obj.color, obj.callback)           
+          }
+        })
+      }
+      
+      // 获取楼层问题
+      function getFloorProblems() {
+        floorList.map((item) => {
+          let newItem = [entityName + '-' + 'F' + item.floorNum, entityName + 'F' + item.floorNum]      
+          // 质量问题      
+          if(item.qualityIssueNum > 0){                  
+            searchMultiAttribute({
+              name: '质量',
+              index: 0,
+              floorNum: item.floorNum,
+              list: newItem,
+              number: item.qualityIssueNum,
+              color: '#ff9900',
+              callback: () => {
+                console.log('安全问题回调事件')
+                uni.navigateTo({  
+                  url: `/pages/inspect/index?entityId=${entityId}&floorId=${item.floorId}` 
+                });
+              }
+            })
+          } 
+          // 安全问题  
+          if(item.safetyIssueNum > 0){  
+            searchMultiAttribute({
+              name: '安全',
+              index: 1,
+              floorNum: item.floorNum,
+              list: newItem,
+              number: item.safetyIssueNum,
+              color: '#ff0000',
+              callback: () => {
+                console.log('安全问题回调事件')
+                uni.navigateTo({  
+                  url: `/pages/safe/index?entityId=${entityId}&floorId=${item.floorId}` 
+                });
+              }
+            })
+          }
+        }) 
+      }
+
+      // 单体下楼层列表
+      function getFloorList() {
+        if(!token){
+          return;
+        }
+        $.ajax({  
+          headers: {  
+            Accept: "application/json; charset=utf-8",
+            'x-access-token': token
+          },  
+          type: "get",
+          url: `${location.origin}/cim6d-construction-app/working/procedure/floor/list/${configId}`,
+          success: function (res) {  
+            if(res.code === 200){
+              floorList = res.data
+              var notStartedList = {
+                color: [0.4,0.4,0.4,0.4],
+                list: []
+              } // 未开始
+              var haveInList = {
+                color: [0.1569,0.4,0.7843,0.4],
+                list: []
+              } // 进行中
+              var advanceList = {
+                color: [0.1804, 0.6902, 0.2980, 0.4],
+                list: []
+              } // 提前完成
+              var delayList = {
+                color: [0.7725, 0.1412, 0.1412, 0.4],
+                list: []
+              } // 延期完成
+              floorList.map((item) => {
+                let newItem = [entityName + '-' + 'F' + item.floorNum, entityName + 'F' + item.floorNum]     
+
+                // 未开始
+                if(!item.status){
+                  notStartedList.list.push(...newItem)
+                }
+                // 进行中
+                if(item.status === 1){
+                  haveInList.list.push(...newItem)
+                }
+                // 已完成
+                if(item.status === 3){
+                  let floorColor = []
+                  // 提前完成颜色
+                  if(item.diff < 0){ 
+                    advanceList.list.push(...newItem)       
+                  }
+                  // 延期完成颜色
+                  if(item.diff > 0){
+                    delayList.list.push(...newItem)    
+                  }
+                }
+              })
+              
+              // 顶楼颜色
+              selectAttribute([entityName + '-RF', entityName + 'RF'], result => {
+                AppBimfish.setThemingColorArray(result, 0.4,0.4,0.4,0.4)
+              })
+              
+              // 未开始楼层高亮
+              selectAttribute(notStartedList.list, result => {
+                AppBimfish.setThemingColorArray(result, ...notStartedList.color)
+              })
+
+              // 进行中楼层高亮
+              selectAttribute(haveInList.list, result => {
+                AppBimfish.setThemingColorArray(result, ...haveInList.color)
+                // let i = 0
+                // AppBimfish.timer = setInterval(() => {
+                //   if (i % 2 == 0) {
+                //     AppBimfish.setThemingColorArray(result, ...haveInList.color)
+                //     AppBimfish.viewer.impl.invalidate(true,false,false)
+                //   } else {
+                //     AppBimfish.clearThemingColorByGUID(result)
+                //   }
+                //   i++
+                // }, 500)
+              })            
+              
+              // 提前完成楼层高亮
+              selectAttribute(advanceList.list, result => {
+                AppBimfish.setThemingColorArray(result, ...delayList.color)
+              }) 
+
+              // 延期完成楼层高亮
+              selectAttribute(delayList.list, result => {
+                AppBimfish.setThemingColorArray(result, ...elayList.color)
+              })  
+              
+              // 获取楼层问题
+              getFloorProblems()   
+            }
+          }  
+        });  
+      }
+      
+      // if(url.indexOf('/cim6d-data-processing') >=0){
+      //   modelUrl = `${location.origin}${url}`
+      // }
+      // 传入的楼层变色
+      function viewSelectFloorNum() {
+        let floorNumList = floorNum.split(',')
+        let list = []
+        floorNumList.map(item => { 
+          let itemList = [entityName + '-' + 'F' + item, entityName + 'F' + item] 
+          list.push(...itemList)
+        })            
+        selectAttribute(list, result => {
+          AppBimfish.setThemingColorArray(result, 0.1569,0.4,0.7843,0.4)
+        }) 
+      }
+      // 根据guid定位并添加标注
+      function fitViewByGUIDFun(guidArray) {
+        // 添加标注
+        const icon = '/images/qualityProblem.png'
+        bimfishApp.addDrawableIconMarkerByGUID(guidArray, icon, ({ screenPoint, guid }) => {
+          console.log('screenPoint:', screenPoint, guid)
+        });
+        // 定位
+        AppBimfish.fitViewByGUID(guidArray)
+      }
+      var AppBim = {
+        // 初始化
+        init: function(id){
+          var key = '465758F8f2B54E72b6956A8ba3625a73'
+          var secret = '5De5712e99b0435AB47a41673B2B1F97faf51014C47041fB97cc12c1bEb7b185'
+          var params = [
+            {
+              id: getUrlStr('id'),
+              modelUrl
+            }           
+          ]
+          var paramsTemp = []
+          modelUrlList.map(item => {
+            paramsTemp.push({
+              id: item.id,
+              modelUrl: `${location.origin}${dataProcess}/noToken/old/basic/commonFile/get/fdht/bim_${item.id}/3d.svf`,
+              modelName: item.name
+            })
+          })
+          params = paramsTemp
+          AppBimfish = new BimfishApp(id, key, secret, { MemoryLimited: true })
+          let bimfishRead = false
+          AppBimfish.init(() =>{
+            AppBimfish.showModel(params)              
+            AppBimfish.viewer.addEventListener('geometryLoaded', function (event){
+              if(env && !bimfishRead){
+                if(floorNum){
+                  viewSelectFloorNum()
+                }else{
+                  getFloorList()
+                }                
+              }
+              if(fitViewByGUID){
+                fitViewByGUIDFun(guidArray)
+              }
+              bimfishRead = true
+            });  
+          })
+        },
+        /**
+         * @description: 通过dbid与modelId显示构件
+         * @param {array} array 数组item示例：{modelId:modelId,dbids:dbids}
+         */
+        showModalByDbIds: function(array) {
+          AppBimfish.hideAll()
+          array.forEach(item => {
+            let model = AppBimfish.findModelByid(item.modelId)
+            AppBimfish.viewer.show(item.dbids, model)
+          })
+        },
+        /**
+         * @description: 通过guids显示构件
+         * @param {array} guids [1,2,3]
+         */
+        showModalByGuids: function(guids) {
+          AppBimfish.hideAll()
+          AppBimfish.show(guids)
+        },
+        /**
+         * @description: 显示全部构件
+         */
+        showAll: function() {
+          AppBimfish.bimfishApp.showAll()
+        },
+        /**
+         * @description:  通过guids进项标注，并定位
+         * @param {Array} guids  [1,2,3]
+         */
+        fitViewByGUID: function(guids) {
+          // 添加标注
+          const icon = '/img/logo.png'
+          AppBimfish.addDrawableIconMarkerByGUID(guids, icon, ({ screenPoint, guid }) => {
+            //console.log('screenPoint:', screenPoint, guid)
+          })
+          // 定位
+          AppBimfish.fitViewByGUID(guids)
+        },
+        // 清除模型颜色
+        clearColor: function(guids) {
+          AppBimfish.bimfishApp.clearThemingColorByGUID(guids)
+        },
+        /**
+         * @description: 根据guid给模型上色
+         * @param {Array} guids
+         * @param {Array} color [red = 0, green = 0, blue = 0, alpha = 1]
+         */
+        setColorByGuids: function({ guids, color }) {
+          AppBimfish.setThemingColor(guids, ...color)
+        },
+        /**
+         * @description: 根据model和dbid进行上色
+         * @param {Array} dbidArray dbid数组
+         * @param {Object} model model对象
+         * @param {Array} color [red = 0, green = 0, blue = 0, alpha = 1]
+         */
+        setColorByDbId: function({ dbidArray, model, color }) {
+          AppBimfish.setThemingColorByDbId(dbidArray, model, ...color)
+        }
+      }   
+      // 获取bim树
+      function queryBimTree(url){
+        $.ajax({  
+          headers: {  
+            'Content-Type': 'application/json',
+            'x-access-token': token
+          },  
+          type: "post",
+          dataType: "json",
+          url,
+          success: function (res) {
+            let datas = res.data || []    
+            let list = []
+            const formatArray = array => {
+              array.map(item => {
+                if (item.type === 3) {
+                  list.push({id: item.bimResourceId, name: item.bimResourceName})
+                }
+                if (item.children && item.type !== 3) {
+                  formatArray(item.children)
+                }
+              })
+            }
+            formatArray(datas)   
+            modelUrlList = list.filter(e => selectEntity.indexOf(e.id) >= 0)
+            if(modelUrlList.length === 0){
+              return
+            }
+            AppBim.init('bimViewer') 
+          }
+        }) 
+      }
+      console.log(1111, entityId, entityId === 'undefined')
+      if(!entityId){
+        queryBimTree(`${location.origin}/cim6d-system${env}/project/bim/tree/active/${projectId}`)
+      }else{
+        queryBimTree(`${location.origin}/cim6d-system${env}/bim/version/entity/tree/${entityId}`)
+      }      
+    </script>
+  </body>
+</html>
